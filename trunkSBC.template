@@ -1,0 +1,163 @@
+media-manager realm-config
+identifier %core-realm%
+addr-prefix 0.0.0.0
+network-interface %core-realm network-interface%
+mm-in-realm disabled
+mm-in-network enabled
+msm-release disabled
+qos-enable enabled
+pai-strip disabled
+media-policy TosMarkingEF
+out-manipulationid          %core-realm-out-sip-manipulation%
+manipulation-string   vodacom.com
+access-control-trust-level     high
+done
+exit
+exit
+
+session-router sip-interface
+realm-id %core-realm%
+state enabled
+sip-port
+address %core-sip-interface-ip%
+port %core-sip-interface-port%
+transport-protocol UDP
+allow-anonymous all
+done
+exit
+registration-caching disabled
+route-to-registrar disabled
+stop-recurse  400-499
+done
+exit
+exit
+
+media-manager steering-pool
+ip-address %core-sip-interface-ip%
+start-port %core-steering-pool-port-start%
+end-port %core-steering-pool-port-end%
+realm-id %core-realm%
+done
+exit
+exit
+
+system network-interface
+name %access-network-interface%
+sub-port-id %access-network-vlan%
+hostname %access-network-interface-ip%
+ip-address %access-network-interface-ip%
+netmask %access-network-interface-netmask%
+gateway %access-network-interface-gateway%
+pri-utility-addr %access-network-interface-pri-util%
+sec-utility-addr %access-network-interface-sec-util%
+done
+exit
+exit
+
+media-manager realm-config
+identifier %access-realm%
+addr-prefix 0.0.0.0
+network-interface %access-network-interface%:%access-network-vlan%
+mm-in-realm disabled
+mm-in-network enabled
+msm-release disabled
+qos-enable enabled
+media-policy   TosMarkingEF
+in-manipulationid	       %access-realm-in-sip-manipulation%
+out-manipulationid             %access-realm-out-sip-manipulation%
+access-control-trust-level     high
+done
+exit
+exit
+
+
+
+session-router sip-interface
+realm-id %access-realm%
+state enabled
+sip-port
+address %access-network-interface-ip%
+port %access-sip-interface-port%
+transport-protocol %access-sip-interface-transport%
+allow-anonymous %access-sip-int-allow-anonymous%
+done
+exit
+
+registration-caching disabled
+route-to-registrar disabled
+stop-recurse  400-499
+done
+exit
+exit
+
+media-manager steering-pool
+ip-address %access-network-interface-ip%
+start-port %access-steering-pool-port-start%
+end-port %access-steering-pool-port-end%
+realm-id %access-realm%
+done
+exit
+exit
+
+
+session-router session-agent
+hostname %access-session-agent%
+ip-address %access-session-agent-ip%
+port %access-session-agent-port%
+state enabled
+app-protocol SIP
+transport-method %access-session-agent-transport%
+realm-id %access-realm%
+ping-method OPTIONS;hops=0
+ping-interval %access-session-agent-ping-interval%
+done
+exit
+exit
+
+
+session-router local-policy
+from-address *
+to-address (%core-source-realm-local-policy-to-address%)
+source-realm %core-realm%
+policy-attribute
+next-hop      %access-session-agent-ip%
+realm         %access-realm%
+app-protocol SIP
+terminate-recursion enabled
+done
+exit
+done
+exit
+exit
+
+
+session-router local-policy
+from-address (%access-source-realm-local-policy-from-address%)
+to-address   *
+source-realm %access-realm%
+policy-attribute
+next-hop      SAG:net.vodacom.com
+realm         %core-realm%
+app-protocol SIP
+terminate-recursion enabled
+done
+exit
+done
+exit
+exit
+
+
+session-router access-control
+realm-id %access-realm%
+source-address %access-session-agent-ip%
+destination-address            %access-network-interface-ip%
+application-protocol           SIP
+transport-protocol             ALL
+access                         permit
+average-rate-limit             100000
+trust-level                    high
+done
+exit
+exit
+exit
+exit

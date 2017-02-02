@@ -1,0 +1,162 @@
+media-manager realm-config
+identifier C-ALBERT-CTE
+addr-prefix 0.0.0.0
+network-interface M10
+mm-in-realm disabled
+mm-in-network enabled
+msm-release disabled
+qos-enable enabled
+pai-strip disabled
+media-policy TosMarkingEF
+out-manipulationid          BW_FixHosts_1
+manipulation-string   vodacom.com
+access-control-trust-level     high
+done
+exit
+exit
+
+session-router sip-interface
+realm-id C-ALBERT-CTE
+state enabled
+sip-port
+address 10.118.111.69
+port 5060
+transport-protocol UDP
+allow-anonymous all
+done
+exit
+registration-caching disabled
+route-to-registrar disabled
+stop-recurse  400-499
+done
+exit
+exit
+
+media-manager steering-pool
+ip-address 10.118.111.69
+start-port 50000
+end-port 59999
+realm-id C-ALBERT-CTE
+done
+exit
+exit
+
+system network-interface
+name M00
+sub-port-id 669
+hostname 192.168.168.10
+ip-address 192.168.168.10
+netmask 255.255.255.0
+gateway 192.168.168.1
+pri-utility-addr 192.168.168.9
+sec-utility-addr 192.168.168.8
+done
+exit
+exit
+
+media-manager realm-config
+identifier PA-ALBERT-CTE
+addr-prefix 0.0.0.0
+network-interface M00:669
+mm-in-realm disabled
+mm-in-network enabled
+msm-release disabled
+qos-enable enabled
+media-policy   TosMarkingEF
+in-manipulationid	       Option200OK
+out-manipulationid             ACME_NAT_TO_FROM_IP
+access-control-trust-level     high
+done
+exit
+exit
+
+
+
+session-router sip-interface
+realm-id PA-ALBERT-CTE
+state enabled
+sip-port
+address 192.168.168.10
+port 5060
+transport-protocol UDP
+allow-anonymous agents-only
+done
+exit
+
+registration-caching disabled
+route-to-registrar disabled
+stop-recurse  400-499
+done
+exit
+exit
+
+media-manager steering-pool
+ip-address 192.168.168.10
+start-port 20000
+end-port 20200
+realm-id PA-ALBERT-CTE
+done
+exit
+exit
+
+
+session-router session-agent
+hostname SA-ALBERT-CTE
+ip-address 192.168.168.1
+port 5060
+state enabled
+app-protocol SIP
+transport-method UDP
+realm-id PA-ALBERT-CTE
+ping-method OPTIONS;hops=0
+ping-interval 30
+done
+exit
+exit
+
+
+session-router local-policy
+from-address *
+to-address (27115756566)
+source-realm C-ALBERT-CTE
+policy-attribute
+next-hop      192.168.168.1
+realm         PA-ALBERT-CTE
+app-protocol SIP
+terminate-recursion enabled
+done
+exit
+done
+exit
+exit
+
+
+session-router local-policy
+from-address (27115756566)
+to-address   *
+source-realm PA-ALBERT-CTE
+policy-attribute
+next-hop      SAG:net.vodacom.com
+realm         C-ALBERT-CTE
+app-protocol SIP
+terminate-recursion enabled
+done
+exit
+done
+exit
+exit
+
+
+session-router access-control
+realm-id PA-ALBERT-CTE
+source-address 192.168.168.1
+destination-address            192.168.168.10
+application-protocol           SIP
+transport-protocol             ALL
+access                         permit
+average-rate-limit             100000
+trust-level                    high
+done
+exit
+exit
+exit
