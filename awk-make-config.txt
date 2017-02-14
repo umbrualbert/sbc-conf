@@ -1,0 +1,8 @@
+Make SBC Config
+TextFile = Includes text file with list of Realms
+
+cat TextFile | awk ' { print $5 } '
+for i in `cat TextFile`; do echo select $i; echo 1; echo dns-realm C-MGWR4-MTB; echo done; done
+
+Another example
+for i in `cat iPFR`; do echo  select $i; echo 1; echo dns-realm C-MGWR4-PFR; echo done; done
