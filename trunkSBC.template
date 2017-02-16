@@ -1,6 +1,6 @@
 media-manager realm-config
 identifier %core-realm%
-addr-prefix 0.0.0.0
+addr-prefix %core-realm-addr-prefix%
 network-interface %core-realm network-interface%
 mm-in-realm disabled
 mm-in-network enabled
@@ -9,6 +9,7 @@ qos-enable enabled
 pai-strip disabled
 media-policy TosMarkingEF
 out-manipulationid          %core-realm-out-sip-manipulation%
+dns-realm %core-realm-dns-realm%
 manipulation-string   vodacom.com
 access-control-trust-level     high
 done
@@ -27,7 +28,8 @@ done
 exit
 registration-caching disabled
 route-to-registrar disabled
-stop-recurse  400-499
+stop-recurse %core-sip-int-stop-recurse%
+redirect-action %core-sip-int-redirect-action%
 done
 exit
 exit
@@ -85,7 +87,6 @@ exit
 
 registration-caching disabled
 route-to-registrar disabled
-stop-recurse  400-499
 done
 exit
 exit
